@@ -164,9 +164,7 @@ AI Interview Practice Platform
 </body>
 </html>
 `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
 
     console.log("✅ OTP email sent to:", email);
 
