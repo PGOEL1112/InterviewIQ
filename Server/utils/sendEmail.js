@@ -1,27 +1,19 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 /* ---------------- TRANSPORTER ---------------- */
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port:587,
-  secure:false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* ---------------- SEND OTP EMAIL ---------------- */
 
 export const sendOTP = async (email, otp) => {
   try {
 
-    const mailOptions = {
-      from: `InterviewIQ <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: `InterviewIQ <onboarding@resend.dev>`,
       to: email,
       subject: "Verify your email • InterviewIQ",
 
