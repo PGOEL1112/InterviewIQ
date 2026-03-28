@@ -25,13 +25,7 @@ const Step1Setup = () => {
   const [starting, setStarting] = useState(false);
 
   const [fileError, setFileError] = useState("");
-
-  const api = axios.create({
-    baseURL: "http://localhost:8000/api",
-    withCredentials: true
-  });
-
-  
+ 
   const handleFile = (e) => {
     const file = e.target.files[0];
 
@@ -73,8 +67,8 @@ const Step1Setup = () => {
 
       const token = localStorage.getItem("token");
 
-      const res = await api.post(
-        "/interview/resume",
+      const res = await axios.post(
+        "/api/interview/resume",
         formData,
         {
           headers: {
@@ -112,7 +106,7 @@ const Step1Setup = () => {
 
         const token = localStorage.getItem("token");
 
-        const res = await api.get("/user/profile",{
+        const res = await axios.get("/api/user/profile",{
           headers:{
             Authorization:`Bearer ${token}`
           }
@@ -139,8 +133,8 @@ const Step1Setup = () => {
         setStarting(true);
         const token = localStorage.getItem("token");
 
-        const res = await api.post(
-          "/interview/start",
+        const res = await axios.post(
+          "/api/interview/start",
           {
             role,
             experienceLevel: experience,

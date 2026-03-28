@@ -10,7 +10,7 @@ const ReportPage = () => {
     const fetchReport = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:8000/api/interview/report-data/${id}`,
+          `/api/interview/report-data/${id}`,
           { withCredentials: true }
         );
         setData(res.data.interview);

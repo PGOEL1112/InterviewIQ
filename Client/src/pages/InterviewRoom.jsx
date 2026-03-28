@@ -43,60 +43,56 @@ const InterviewRoom = () => {
 
   const [timeLeft, setTimeLeft] = useState(60);
   const [timeLimit, setTimeLimit] = useState(60);
-  
+
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
   const [analysis, setAnalysis] = useState([]);
-  
+
   const [finalReport, setFinalReport] = useState(null);
-  
+
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [voiceGender, setVoiceGender] = useState("male");
-  const [loadingQuestion,setLoadingQuestion] = useState(false);
+  const [loadingQuestion, setLoadingQuestion] = useState(false);
   const [introDone, setIntroDone] = useState(false);
 
-  const [aiMessage,setAiMessage] = useState("");
-  const [errorMsg,setErrorMsg] = useState("");
+  const [aiMessage, setAiMessage] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const [introMessage,setIntroMessage] = useState("");
+  const [introMessage, setIntroMessage] = useState("");
   const [isTimeUp, setIsTimeUp] = useState(false);
 
   const [startTimer, setStartTimer] = useState(false);
- 
+
   const hasSubmittedRef = useRef(false);
-  const submitTypeRef = useRef(null); 
+  const submitTypeRef = useRef(null);
 
 
   const [interviewMode, setInterviewMode] = useState("Technical");
   const [phase, setPhase] = useState("tech"); // tech → hr
-  
+
   const timerRef = useRef(null);
   const videoRef = useRef(null);
   const recognitionRef = useRef(null);
   const typingRef = useRef(null);
 
-   const reportRef = useRef();
+  const reportRef = useRef(null);
 
-  const api = axios.create({
-    baseURL: "http://localhost:8000/api",
-    withCredentials: true
-  });
 
   /* ---------------------------
      GENERATE QUESTION
   ---------------------------- */
 
   const generateQuestion = async () => {
-   if (loadingQuestion || !introDone) return;
+    if (loadingQuestion || !introDone) return;
     setLoadingQuestion(true);
     console.log("🔥 GENERATE QUESTION CALLED");
-    try{  
+    try {
       const token = localStorage.getItem("token");
 
-      const res = await api.post(
-      `/interview/question/${interviewId}`,
+      const res = await axios.post(
+        `/api/interview/question/${interviewId}`,
         {},
         {
           headers: {
@@ -104,90 +100,90 @@ const InterviewRoom = () => {
           }
         }
       );
-  
-    const data = res.data;
-    console.log("📥 NEW QUESTION:", data.questionNumber);
-    setInterviewMode(data.interviewType);
 
-    let gender = "male";
+      const data = res.data;
+      console.log("📥 NEW QUESTION:", data.questionNumber);
+      setInterviewMode(data.interviewType);
 
-    if(data.interviewType === "HR"){
-      gender = "female";
-    }
-    else if (data.interviewType === "Technical") {
-      gender = "male";
-    }
-    
-    else if (data.interviewType === "Mixed") {
-      if (data.questionNumber <= 5) {
-        gender = "male";
-        setPhase("tech");
-      } else {
+      let gender = "male";
+
+      if (data.interviewType === "HR") {
         gender = "female";
-        setPhase("hr");
       }
-    }
-    setVoiceGender(gender);
+      else if (data.interviewType === "Technical") {
+        gender = "male";
+      }
 
-    if (
-      data.interviewType === "Mixed" &&
-      phase === "tech" &&
-      data.questionNumber === 6
-    ) {
-      setVoiceGender("female"); // switch UI video
+      else if (data.interviewType === "Mixed") {
+        if (data.questionNumber <= 5) {
+          gender = "male";
+          setPhase("tech");
+        } else {
+          gender = "female";
+          setPhase("hr");
+        }
+      }
+      setVoiceGender(gender);
 
-      typeText(
-        "Now it's time to conduct HR Interview. Let's begin.",
-        "question"
-      );
+      if (
+        data.interviewType === "Mixed" &&
+        phase === "tech" &&
+        data.questionNumber === 6
+      ) {
+        setVoiceGender("female"); // switch UI video
 
+        typeText(
+          "Now it's time to conduct HR Interview. Let's begin.",
+          "question"
+        );
+
+        window.speechSynthesis.cancel();
+
+        setTimeout(() => {
+          speakText(
+            "Now it's time to conduct HR Interview. Let's begin.",
+            false,
+            false,
+            "female"
+          );
+        }, 300);
+        return; // 🚨 IMPORTANT → stop normal question
+      }
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      setQuestion(data.question);
+      setAnswer("");
+      setFeedback("");
+      setStartTimer(false);
+      hasSubmittedRef.current = false;
+      setDifficulty(data.difficulty);
+
+      setTimeLimit(data.timeLimit || 60);
+      setTimeLeft(data.timeLimit || 60);
+      setQuestionNumber(data.questionNumber);
+      setTotalQuestions(data.totalQuestions);
+      typeText(data.question, "question");
       window.speechSynthesis.cancel();
 
+      videoRef.current?.pause();
+      videoRef.current.currentTime = 0;
+
       setTimeout(() => {
-        speakText(
-          "Now it's time to conduct HR Interview. Let's begin.",
-          false,
-          false,
-          "female"
-        );
+        speakText(data.question, false, true, gender);
       }, 300);
-      return; // 🚨 IMPORTANT → stop normal question
+
+    }
+    catch (err) {
+      console.log("Question error:", err);
     }
 
-    if(timerRef.current){
-      clearInterval(timerRef.current);
-      timerRef.current = null;
+    finally {
+      setLoadingQuestion(false);
     }
-
-    setQuestion(data.question);
-    setAnswer("");
-    setFeedback("");
-    setStartTimer(false);
-    hasSubmittedRef.current=false;
-    setDifficulty(data.difficulty);
-
-    setTimeLimit(data.timeLimit || 60);
-    setTimeLeft(data.timeLimit || 60);
-    setQuestionNumber(data.questionNumber);
-    setTotalQuestions(data.totalQuestions);
-    typeText(data.question, "question");
-    window.speechSynthesis.cancel();  
-
-    videoRef.current?.pause();
-    videoRef.current.currentTime = 0;
-
-    setTimeout(()=>{
-      speakText(data.question, false, true, gender);
-    },300);
-
-  }
-  catch(err){
-    console.log("Question error:",err);
-  }
-
-  finally{
-    setLoadingQuestion(false);
-  }
 
   };
 
@@ -195,7 +191,7 @@ const InterviewRoom = () => {
      AI SPEAK FUNCTION
   ---------------------------- */
 
-  const speakText = (text, urgent=false, startTimerAfter=false, gender="male") => {
+  const speakText = (text, urgent = false, startTimerAfter = false, gender = "male") => {
 
     if (!window.speechSynthesis) return;
 
@@ -203,8 +199,8 @@ const InterviewRoom = () => {
       speechSynthesis.cancel();
     }
     const voices = speechSynthesis.getVoices();
-  
-    if(!voices.length){
+
+    if (!voices.length) {
       speechSynthesis.onvoiceschanged = () => speakText(text);
       return;
     }
@@ -251,8 +247,8 @@ const InterviewRoom = () => {
       if (!introDone) {
         setIntroDone(true);
         setIntroMessage("");
-      } 
-      else if(startTimerAfter){
+      }
+      else if (startTimerAfter) {
         setTimeout(() => {
           setStartTimer(true);
         }, 200);
@@ -262,22 +258,22 @@ const InterviewRoom = () => {
     speechSynthesis.speak(utterance);
   };
 
- const typeText = (text, mode = "question") => {
-  const setter = mode === "intro" ? setIntroMessage : setAiMessage;
-  
-  if (typingRef.current) {
-    clearInterval(typingRef.current);
-  }
-  setter("");
-  let i = 0;
-  typingRef.current = setInterval(() => {
-    setter(text.slice(0, i + 1)); 
-    i++;
-    if (i >= text.length) {
+  const typeText = (text, mode = "question") => {
+    const setter = mode === "intro" ? setIntroMessage : setAiMessage;
+
+    if (typingRef.current) {
       clearInterval(typingRef.current);
     }
-  }, 25);
-};
+    setter("");
+    let i = 0;
+    typingRef.current = setInterval(() => {
+      setter(text.slice(0, i + 1));
+      i++;
+      if (i >= text.length) {
+        clearInterval(typingRef.current);
+      }
+    }, 25);
+  };
 
   const playIntro = () => {
     const userName = localStorage.getItem("name") || "User";
@@ -292,10 +288,10 @@ const InterviewRoom = () => {
   Let's begin your interview.
   `;
 
-  typeText(welcomeText,"intro");
-  speakText(welcomeText);
+    typeText(welcomeText, "intro");
+    speakText(welcomeText);
 
-};
+  };
 
   /* ---------------------------
      SPEECH TO TEXT
@@ -307,11 +303,11 @@ const InterviewRoom = () => {
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
 
-      if(!SpeechRecognition){
-        setErrorMsg("⚠ Speech recognition not supported");
-        setTimeout(()=>setErrorMsg(""),2000);
-        return;
-      }
+    if (!SpeechRecognition) {
+      setErrorMsg("⚠ Speech recognition not supported");
+      setTimeout(() => setErrorMsg(""), 2000);
+      return;
+    }
 
     const recognition = new SpeechRecognition();
 
@@ -338,14 +334,14 @@ const InterviewRoom = () => {
 
   useEffect(() => {
     console.log("⏱ TIMER CHECK:", startTimer, "Q:", questionNumber);
-    
-    if (!startTimer) return; 
-    if(timerRef.current) return;
-    
+
+    if (!startTimer) return;
+    if (timerRef.current) return;
+
     timerRef.current = setInterval(() => {
 
       setTimeLeft(prev => {
-        if (prev ===8) {
+        if (prev === 8) {
           window.speechSynthesis.cancel();
           speakText("Hurry up! Only 5 seconds left!", true, false, voiceGender); // true = urgent tone
         }
@@ -365,28 +361,28 @@ const InterviewRoom = () => {
 
     }, 1000);
 
-    return () =>  {
+    return () => {
       clearInterval(timerRef.current);
-      timerRef.current=null;
+      timerRef.current = null;
     };
 
   }, [startTimer]);
 
-  const submitAnswer = async (type="manual") => {
-    if(hasSubmittedRef.current) return;
-    hasSubmittedRef.current=true;
-    submitTypeRef.current=type;
+  const submitAnswer = async (type = "manual") => {
+    if (hasSubmittedRef.current) return;
+    hasSubmittedRef.current = true;
+    submitTypeRef.current = type;
 
-     if(timerRef.current){
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
 
-    setStartTimer(false); 
+    setStartTimer(false);
     recognitionRef.current?.stop();
-    
+
     const finalAnswer = answer?.trim() || "";
-    
+
     if (type === "manual" && finalAnswer.length < 3) {
       setErrorMsg("⚠ Please answer before submitting");
       hasSubmittedRef.current = false;
@@ -394,23 +390,23 @@ const InterviewRoom = () => {
     }
 
     setIsSubmitting(true);
-    try{
+    try {
       const token = localStorage.getItem("token");
-      const res = await api.post(
-      `/interview/answer/${interviewId}`,
-      {
-        answer : finalAnswer, 
-        timeTaken:  type === "auto" ? timeLimit : Math.max(0,timeLimit - timeLeft)
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+      const res = await axios.post(
+        `/api/interview/answer/${interviewId}`,
+        {
+          answer: finalAnswer,
+          timeTaken: type === "auto" ? timeLimit : Math.max(0, timeLimit - timeLeft)
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      }
-    );
+      );
 
-    const data = res.data;
-    if (type === "auto") {
+      const data = res.data;
+      if (type === "auto") {
         setIsTimeUp(true);
         setFeedback({
           text: "⏰ Time over! You couldn't answer this question.",
@@ -432,26 +428,26 @@ const InterviewRoom = () => {
         });
       }
 
-    setAnalysis(prev => [
-      ...prev,
-      {
-        question,
-        answer:finalAnswer,
-        score: data.score,
-        confidence: data.confidence,
-        communication: data.communication,
-        correctness: data.correctness,
-        feedback: data.feedback
-      }
-    ]);
-  }
+      setAnalysis(prev => [
+        ...prev,
+        {
+          question,
+          answer: finalAnswer,
+          score: data.score,
+          confidence: data.confidence,
+          communication: data.communication,
+          correctness: data.correctness,
+          feedback: data.feedback
+        }
+      ]);
+    }
 
-  catch(err){
-    console.log("Submit error",err);
-  } 
-  finally{
-     setIsSubmitting(false);
-  }
+    catch (err) {
+      console.log("Submit error", err);
+    }
+    finally {
+      setIsSubmitting(false);
+    }
   };
 
   /* ---------------------------
@@ -464,361 +460,363 @@ const InterviewRoom = () => {
       return;
     }
 
-     window.speechSynthesis.cancel();
-      setIsAISpeaking(false);
-      setLoadingQuestion(false);
+    window.speechSynthesis.cancel();
+    setIsAISpeaking(false);
+    setLoadingQuestion(false);
 
 
     recognitionRef.current?.stop();
 
-    if(timerRef.current){
+    if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
     setStartTimer(false);
-     setIsTimeUp(false);
+    setIsTimeUp(false);
     setAnswer("");
     setFeedback("");
-    hasSubmittedRef.current=false;
-    submitTypeRef.current=null;
+    hasSubmittedRef.current = false;
+    submitTypeRef.current = null;
 
     setTimeout(() => {
       generateQuestion();
     }, 1000);
   };
 
-const finishInterview = async () => {
-  try{
-    const token = localStorage.getItem("token");
+  const finishInterview = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-    await api.post(
-      `/interview/complete/${interviewId}`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+      await axios.post(
+        `/api/interview/complete/${interviewId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
+      );
+
+      const interviewType = interviewMode;
+      let gender = "male";
+
+      if (interviewType === "HR") {
+        gender = "female";
       }
-    );
+      else if (interviewType === "Technical") {
+        gender = "male";
+      }
+      else if (interviewType === "Mixed") {
+        // Mixed → ending HR hota hai → female
+        gender = "female";
+      }
 
-    const interviewType = interviewMode;
-     let gender = "male";
+      speakText(
+        "Thank you for completing your interview. Your performance has been analyzed successfully. You can now view your detailed report and insights on your dashboard.",
+        false,
+        false,
+        gender
+      );
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 12500);
 
-    if (interviewType === "HR") {
-      gender = "female";
-    } 
-    else if (interviewType === "Technical") {
-      gender = "male";
-    } 
-    else if (interviewType === "Mixed") {
-      // Mixed → ending HR hota hai → female
-      gender = "female";
+    } catch (err) {
+      console.log("Finish error:", err);
+      const interviewType = interviewMode;
+      let gender = interviewType === "HR" ? "female" : "male";
+      speakText(
+        "Thank you for completing your interview. Your performance has been analyzed successfully. You can now view your detailed report and insights on your dashboard.",
+        false,
+        false,
+        gender
+      );
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 12500);
     }
-
-   speakText(
-   "Thank you for completing your interview. Your performance has been analyzed successfully. You can now view your detailed report and insights on your dashboard.",
-   false,
-   false,
-   gender
-  );
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 12500);
-
-  }catch(err){
-    console.log("Finish error:", err);
-    const interviewType = interviewMode;
-    let gender = interviewType === "HR" ? "female" : "male";
-    speakText(
-      "Thank you for completing your interview. Your performance has been analyzed successfully. You can now view your detailed report and insights on your dashboard.",
-      false,
-      false,
-      gender
-    );
-    setTimeout(() => {
-      navigate("/dashboard");
-    }, 12500);
-  }
-};
+  };
 
   /* ==========================
      FIRST LOAD
   ========================== */
-    useEffect(()=>{
-        speechSynthesis.onvoiceschanged = () => {
-        speechSynthesis.getVoices();
-        }
-    },[]);
+  useEffect(() => {
+    speechSynthesis.onvoiceschanged = () => {
+      speechSynthesis.getVoices();
+    }
+  }, []);
 
-useEffect(() => {
-  if (introDone) {
-    generateQuestion();
-  }
-}, [introDone]);
+  useEffect(() => {
+    if (introDone) {
+      generateQuestion();
+    }
+  }, [introDone]);
 
 
-useEffect(() => {
-  if(interviewId && !introDone){
-    playIntro();
-  }
-}, [interviewId, introDone]);
+  useEffect(() => {
+    if (interviewId && !introDone) {
+      playIntro();
+    }
+  }, [interviewId, introDone]);
 
 
   /* ---------------------------
      UI
   ---------------------------- */
 
-  return(
+  return (
 
-<div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#020617] text-white p-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#020617] text-white p-10">
 
-<motion.div
-initial={{opacity:0,scale:0.95}}
-animate={{opacity:1,scale:1}}
-transition={{duration:0.6}}
-className="w-[1200px] grid grid-cols-[360px_1fr] bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
->
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6 }}
+        className="w-[1200px] grid grid-cols-[360px_1fr] bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+      >
 
-{/* LEFT PANEL */}
+        {/* LEFT PANEL */}
 
-<div className="p-8 border-r border-white/10 flex flex-col items-center gap-6">
+        <div className="p-8 border-r border-white/10 flex flex-col items-center gap-6">
 
-<motion.div
-animate={{boxShadow:[
-"0 0 0px rgba(59,130,246,0.3)",
-"0 0 40px rgba(59,130,246,0.6)",
-"0 0 0px rgba(59,130,246,0.3)"
-]}}
-transition={{duration:3,repeat:Infinity}}
-className="rounded-2xl overflow-hidden border border-white/10"
->
+          <motion.div
+            animate={{
+              boxShadow: [
+                "0 0 0px rgba(59,130,246,0.3)",
+                "0 0 40px rgba(59,130,246,0.6)",
+                "0 0 0px rgba(59,130,246,0.3)"
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+            className="rounded-2xl overflow-hidden border border-white/10"
+          >
 
-<video key={voiceGender} ref={videoRef} muted loop className="w-[300px]">
-<source
-src={voiceGender==="female"?femaleAI:maleAI}
-type="video/mp4"
-/>
-</video>
+            <video key={voiceGender} ref={videoRef} muted loop className="w-[300px]">
+              <source
+                src={voiceGender === "female" ? femaleAI : maleAI}
+                type="video/mp4"
+              />
+            </video>
 
-</motion.div>
+          </motion.div>
 
-<div className="text-gray-300 text-sm text-center min-h-[40px]">
-{introMessage || (isAISpeaking ? "AI Speaking..." : "AI Listening")}
-</div>
+          <div className="text-gray-300 text-sm text-center min-h-[40px]">
+            {introMessage || (isAISpeaking ? "AI Speaking..." : "AI Listening")}
+          </div>
 
-{isAISpeaking && <VoiceWave/>}
+          {isAISpeaking && <VoiceWave />}
 
-{/* TIMER */}
+          {/* TIMER */}
 
-<div className="bg-white/5 border border-white/10 p-6 rounded-2xl text-center">
+          <div className="bg-white/5 border border-white/10 p-6 rounded-2xl text-center">
 
-<div className={`w-28 mx-auto ${timeLeft <= 10 ? "animate-pulse" : ""}`}>
+            <div className={`w-28 mx-auto ${timeLeft <= 10 ? "animate-pulse" : ""}`}>
 
-<CircularProgressbar
-value={timeLeft}
-maxValue={timeLimit}
-text={`${timeLeft}s`}
-styles={{
-path:{
-  stroke: timeLeft <= 10 ? "#ef4444" : "#3b82f6"
-},
-trail:{stroke:"#1e293b"},
-text:{fill:"#fff",fontSize:"20px"}
-}}
-/>
+              <CircularProgressbar
+                value={timeLeft}
+                maxValue={timeLimit}
+                text={`${timeLeft}s`}
+                styles={{
+                  path: {
+                    stroke: timeLeft <= 10 ? "#ef4444" : "#3b82f6"
+                  },
+                  trail: { stroke: "#1e293b" },
+                  text: { fill: "#fff", fontSize: "20px" }
+                }}
+              />
 
-</div>
+            </div>
 
-<p className="text-gray-400 mt-3">
-Interview Timer
-</p>
+            <p className="text-gray-400 mt-3">
+              Interview Timer
+            </p>
 
-</div>
+          </div>
 
-{/* QUESTION PROGRESS */}
+          {/* QUESTION PROGRESS */}
 
-<div className="w-full mt-2">
+          <div className="w-full mt-2">
 
-<div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
 
-{Array.from({ length: totalQuestions }).map((_, i) => {
+              {Array.from({ length: totalQuestions }).map((_, i) => {
 
-const step = i + 1;
+                const step = i + 1;
 
-return (
+                return (
 
-<div key={i} className="flex-1 flex items-center">
+                  <div key={i} className="flex-1 flex items-center">
 
-{/* circle */}
+                    {/* circle */}
 
-<div
-className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold
+                    <div
+                      className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold
 ${step < questionNumber
-? "bg-green-500 text-white"
-: step === questionNumber
-? "bg-blue-500 text-white"
-: "bg-gray-700 text-gray-400"
-}`}
->
-{step < questionNumber ? "✓" : step}
-</div>
+                          ? "bg-green-500 text-white"
+                          : step === questionNumber
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-700 text-gray-400"
+                        }`}
+                    >
+                      {step < questionNumber ? "✓" : step}
+                    </div>
 
-{/* line */}
+                    {/* line */}
 
-{i !== totalQuestions - 1 && (
-<div
-className={`flex-1 h-[2px]
+                    {i !== totalQuestions - 1 && (
+                      <div
+                        className={`flex-1 h-[2px]
 ${step < questionNumber ? "bg-green-500" : "bg-gray-700"}`}
-/>
-)}
+                      />
+                    )}
 
-</div>
+                  </div>
 
-);
+                );
 
-})}
+              })}
 
-</div>
+            </div>
 
-<p className="text-xs text-gray-400 mt-2 text-center">
-Interview Progress
-</p>
+            <p className="text-xs text-gray-400 mt-2 text-center">
+              Interview Progress
+            </p>
 
-</div>
+          </div>
 
-</div>
-
-
-{/* RIGHT PANEL */}
-
-<div className="p-10 flex flex-col gap-8">
-
-<div>
-  <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
-    AI Smart Interview
-  </h2>
-</div>
-
-{loadingQuestion && (
-  <p className="text-blue-400 text-sm animate-pulse">
-    Generating question...
-  </p>
-)}
-
-{/* QUESTION CARD */}
-
-<motion.div
-initial={{y:20,opacity:0}}
-animate={{y:0,opacity:1}}
-className="bg-white/5 border border-white/10 p-6 rounded-2xl"
->
-
-<p className="text-gray-400 text-sm uppercase tracking-widest">
-Question {questionNumber} of {totalQuestions}
-</p>
-
-<p className="text-xs text-indigo-400 mt-1">
-  Difficulty: {difficulty}
-</p>
-
-<p className="mt-3 text-lg text-gray-200 font-medium leading-relaxed">
-  {aiMessage}
-</p>
-
-</motion.div>
-
-{/* ANSWER */}
-
-<textarea
-value={answer}
-disabled={isTimeUp}
-onChange={(e)=>setAnswer(e.target.value)}
-placeholder="Type your answer here..."
-className="w-full h-[230px] p-6 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-/>
-
-{/* BUTTONS */}
-
-<div className="flex gap-4">
-
-<motion.button
-whileHover={{scale:1.05}}
-disabled={isTimeUp}
-whileTap={{scale:0.95}}
-onClick={startListening}
-className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500"
->
-<FaMicrophone/>
-Speak
-</motion.button>
-
-<motion.button
-whileHover={{scale:1.05}}
-disabled={isSubmitting || isTimeUp}
-whileTap={{scale:0.95}}
-onClick={() => submitAnswer("manual")}
-className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500"
->
-<FaPaperPlane/>
-Submit
-</motion.button>
-
-</div>
-
-{errorMsg && (
-  <div className="text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-sm">
-    {errorMsg}
-  </div>
-)}
+        </div>
 
 
-{/* FEEDBACK */}
+        {/* RIGHT PANEL */}
 
-{feedback&&(
+        <div className="p-10 flex flex-col gap-8">
 
-<motion.div
-initial={{opacity:0}}
-animate={{opacity:1}}
-className="bg-emerald-500/10 border border-emerald-400/30 p-6 rounded-2xl"
->
+          <div>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
+              AI Smart Interview
+            </h2>
+          </div>
 
-<p className="text-emerald-300">{feedback?.text}</p>
+          {loadingQuestion && (
+            <p className="text-blue-400 text-sm animate-pulse">
+              Generating question...
+            </p>
+          )}
 
-<div className="mt-3 text-gray-300 text-sm">
-  <b>Suggested Answer:</b>
-  <p className="mt-1 text-gray-400">{feedback?.ideal}</p>
-</div>
+          {/* QUESTION CARD */}
+
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="bg-white/5 border border-white/10 p-6 rounded-2xl"
+          >
+
+            <p className="text-gray-400 text-sm uppercase tracking-widest">
+              Question {questionNumber} of {totalQuestions}
+            </p>
+
+            <p className="text-xs text-indigo-400 mt-1">
+              Difficulty: {difficulty}
+            </p>
+
+            <p className="mt-3 text-lg text-gray-200 font-medium leading-relaxed">
+              {aiMessage}
+            </p>
+
+          </motion.div>
+
+          {/* ANSWER */}
+
+          <textarea
+            value={answer}
+            disabled={isTimeUp}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Type your answer here..."
+            className="w-full h-[230px] p-6 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* BUTTONS */}
+
+          <div className="flex gap-4">
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              disabled={isTimeUp}
+              whileTap={{ scale: 0.95 }}
+              onClick={startListening}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500"
+            >
+              <FaMicrophone />
+              Speak
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              disabled={isSubmitting || isTimeUp}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => submitAnswer("manual")}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500"
+            >
+              <FaPaperPlane />
+              Submit
+            </motion.button>
+
+          </div>
+
+          {errorMsg && (
+            <div className="text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-sm">
+              {errorMsg}
+            </div>
+          )}
 
 
-{questionNumber<totalQuestions?(
-<button
-onClick={nextQuestion}
-className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500"
->
-Next Question →
-</button>
-):(
-<button
-onClick={async () => {
-  await finishInterview();
-}}
-className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500"
->
-Finish Interview
-</button>
-)}
+          {/* FEEDBACK */}
 
-</motion.div>
+          {feedback && (
 
-)}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="bg-emerald-500/10 border border-emerald-400/30 p-6 rounded-2xl"
+            >
 
-</div>
+              <p className="text-emerald-300">{feedback?.text}</p>
 
-</motion.div>
-</div>
+              <div className="mt-3 text-gray-300 text-sm">
+                <b>Suggested Answer:</b>
+                <p className="mt-1 text-gray-400">{feedback?.ideal}</p>
+              </div>
 
-)
+
+              {questionNumber < totalQuestions ? (
+                <button
+                  onClick={nextQuestion}
+                  className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500"
+                >
+                  Next Question →
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    await finishInterview();
+                  }}
+                  className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500"
+                >
+                  Finish Interview
+                </button>
+              )}
+
+            </motion.div>
+
+          )}
+
+        </div>
+
+      </motion.div>
+    </div>
+
+  )
 };
 
 export default InterviewRoom;

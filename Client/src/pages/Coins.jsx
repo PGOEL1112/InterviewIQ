@@ -78,7 +78,7 @@ const Coins = () => {
             }
 
             const res = await axios.post(
-                "http://localhost:8000/api/payment/create-order",
+                "/api/payment/create-order",
                 {
                     amount: finalAmount,
                     plan,
@@ -100,7 +100,7 @@ const Coins = () => {
 
                 handler: async function (response) {
                     const verifyRes = await axios.post(
-                        "http://localhost:8000/api/payment/verify",
+                        "/api/payment/verify",
                         {
                             ...response,
                             plan,

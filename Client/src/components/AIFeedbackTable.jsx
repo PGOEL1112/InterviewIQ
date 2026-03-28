@@ -63,7 +63,7 @@ const AIFeedbackUltra = ({ interviews, onDelete }) => {
                   <button
                     onClick={() => {
                       window.open(
-                        `http://localhost:8000/api/interview/report/${i._id}`,
+                        `/api/interview/report/${i._id}`,
                         "_blank"
                       );
                     }}

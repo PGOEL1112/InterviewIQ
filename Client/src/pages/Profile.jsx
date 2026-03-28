@@ -13,23 +13,14 @@ const Profile = ( ) => {
   const [edit, setEdit] = useState(false);
   const [interviews, setInterviews] = useState([]);
 
-  const api = axios.create({
-    baseURL: "http://localhost:8000/api",
-    withCredentials: true
-  });
 
+ 
   useEffect(() => {
-    api.get("/user/profile").then(res => {
-      setUser(res.data.user);
-    });
-  }, []);
-
-  useEffect(() => {
-    api.get("/user/profile").then(res => {
+    axios.get("/api/user/profile").then(res => {
       setUser(res.data.user);
     });
 
-    api.get("/interview/history").then(res => {
+    axios.get("/api/interview/history").then(res => {
       setInterviews(res.data.interviews); // 🔥 IMPORTANT
     });
   }, []);
@@ -45,19 +36,19 @@ const Profile = ( ) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const res = await api.post("/user/upload", formData);
+  const res = await axios.post("/api/user/upload", formData);
 
   const imageUrl = res.data.imageUrl;
 
   setUser(prev => ({ ...prev, image: imageUrl }));
 
-  await api.put("/user/profile", {
+  await axios.put("/api/user/profile", {
     ...user,
     image: imageUrl
   });
 };
   const saveProfile = async () => {
-    await api.put("/user/profile", user);
+    await axios.put("/api//user/profile", user);
     setEdit(false);
   };
 

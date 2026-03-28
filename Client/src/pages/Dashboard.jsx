@@ -38,11 +38,6 @@ const Dashboard = () => {
   const [analytics, setAnalytics] = useState(null);
 
   const profileRef = useRef();
-  const api = axios.create({
-    baseURL: "http://localhost:8000/api",
-    withCredentials: true
-  });
-
   /* =============================
      FETCH INTERVIEW HISTORY
   ============================= */
@@ -55,8 +50,8 @@ const Dashboard = () => {
 
         const token = localStorage.getItem("token");
 
-        const res = await api.get(
-          "/interview/history",
+        const res = await axios.get(
+          "/api/interview/history",
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -128,7 +123,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
 
-      await api.delete(`/interview/${id}`, {
+      await axios.delete(`/api/interview/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
