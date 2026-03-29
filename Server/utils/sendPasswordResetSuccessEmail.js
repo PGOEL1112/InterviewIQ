@@ -1,17 +1,9 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-/* ---------- TRANSPORTER ---------- */
-
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* ---------- SEND SUCCESS EMAIL ---------- */
 
@@ -19,12 +11,10 @@ export const sendPasswordResetSuccessEmail = async (email, name) => {
 
     try {
 
-        const mailOptions = {
-
-            from: `InterviewIQ <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Password Updated Successfully • InterviewIQ",
-
+      await resend.emails.send({
+      from: "InterviewIQ <onboarding@resend.dev>",
+      to: email,
+      subject: "Password Updated Successfully • InterviewIQ",
             html: `
 <!DOCTYPE html>
 <html>
@@ -138,8 +128,6 @@ AI Interview Practice Platform
 </html>
 `
         };
-
-        await transporter.sendMail(mailOptions);
 
         console.log("✅ Password reset confirmation sent");
 
