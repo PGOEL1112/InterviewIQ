@@ -82,7 +82,11 @@ const Auth = () => {
       console.log("GOOGLE RES:", res.data); 
       dispatch(setUser(res.data.user));
       localStorage.setItem("name", res.data.user.name);
-      navigate("/dashboard");
+     useEffect(() => {
+      if (localStorage.getItem("name")) {
+        navigate("/dashboard");
+      }
+    }, []);
 
     } catch (err) {
 
