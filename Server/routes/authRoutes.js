@@ -25,6 +25,12 @@ router.post("/verify-email", verifyEmail);
 router.post("/resend-otp", resendOTP);
 router.post("/login", loginUser);
 router.post("/google", googleAuth);
+router.get("/me", isAuth, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
+});
 
 
 /* ---------- PASSWORD RESET ---------- */
