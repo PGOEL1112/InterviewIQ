@@ -262,12 +262,17 @@ export const getProfile = async (req,res)=>{
 
 /* ---------------- LOGOUT ---------------- */
 
-export const logoutUser = async (req,res)=>{
-    res.clearCookie("token");
-    res.json({
-      success:true,
-      message:"Logged out successfully"
-    });
+export const logoutUser = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None"
+  });
+
+  res.json({
+    success: true,
+    message: "Logged out successfully"
+  });
 };
 
 
