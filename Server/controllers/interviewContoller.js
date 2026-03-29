@@ -696,7 +696,6 @@ export const startResumeInterview = async (req, res) => {
       }))
 
     });
-}
 
     res.json({
       success: true,
@@ -706,10 +705,6 @@ export const startResumeInterview = async (req, res) => {
   } catch (error) {
 
     console.error(error);
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
     res.status(500).json({
       success: false,
       message: error.message
