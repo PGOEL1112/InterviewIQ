@@ -28,23 +28,7 @@ const Auth = () => {
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  /* ---------------- AUTO HIDE MESSAGE ---------------- */
-useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      await axios.get("/auth/me");
-      navigate("/dashboard");
-    } catch(err) {
-      console.log(err);
-      // stay on auth page
-    }
-  };
-
-  checkAuth();
-}, []);
-  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;  
     
   useEffect(() => {
 
