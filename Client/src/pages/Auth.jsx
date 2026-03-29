@@ -32,15 +32,16 @@ const Auth = () => {
 
   /* ---------------- AUTO HIDE MESSAGE ---------------- */
 useEffect(() => {
+  const user = localStorage.getItem("user");
+  if (!user) return; 
+
   const checkAuth = async () => {
     try {
-      const res = await axios.get("/api/auth/me");
-
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      await axios.get("/api/auth/me");
       navigate("/dashboard");
-
-    } catch (err) {
-      localStorage.removeItem("user"); // 🔥 auto fix
+    } catch(err) {
+      console.log(err);
+      localStorage.removeItem("user");
     }
   };
 
