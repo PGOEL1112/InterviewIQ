@@ -65,18 +65,7 @@ const Step1Setup = () => {
       const formData = new FormData();
       formData.append("resume", resume);
 
-      const token = localStorage.getItem("token");
-
-      const res = await axios.post(
-        "/api/interview/resume",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
+      const res = await axios.post("/interview/resume",formData);
       const data = res.data;
 
       setAnalysis(data);
@@ -103,15 +92,7 @@ const Step1Setup = () => {
     const fetchUser = async () => {
 
       try {
-
-        const token = localStorage.getItem("token");
-
-        const res = await axios.get("/api/user/profile",{
-          headers:{
-            Authorization:`Bearer ${token}`
-          }
-        });
-
+        const res = await axios.get("/user/profile");
         setCredits(res.data.user.credits);
 
       } catch(err){
@@ -131,10 +112,8 @@ const Step1Setup = () => {
       }
       try {
         setStarting(true);
-        const token = localStorage.getItem("token");
-
         const res = await axios.post(
-          "/api/interview/start",
+          "/interview/start",
           {
             role,
             experienceLevel: experience,
@@ -145,11 +124,6 @@ const Step1Setup = () => {
                 
              skills: analysis?.skills || []
           },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
         );
 
         const interviewId = res.data.interview._id;
