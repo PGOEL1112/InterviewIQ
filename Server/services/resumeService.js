@@ -38,7 +38,7 @@ export const analyzeResume = async (filePath) => {
       const response = await axios.get(filePath, {
         responseType: "arraybuffer"
       });
-      buffer = response.data;
+      buffer = Buffer.from(response.data);
     } else {
       buffer = fs.readFileSync(filePath);
     }
