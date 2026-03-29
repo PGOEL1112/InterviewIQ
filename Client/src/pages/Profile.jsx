@@ -16,11 +16,11 @@ const Profile = ( ) => {
 
  
   useEffect(() => {
-    axios.get("/api/user/profile").then(res => {
+    axios.get("/user/profile").then(res => {
       setUser(res.data.user);
     });
 
-    axios.get("/api/interview/history").then(res => {
+    axios.get("/interview/history").then(res => {
       setInterviews(res.data.interviews); // 🔥 IMPORTANT
     });
   }, []);
@@ -36,20 +36,25 @@ const Profile = ( ) => {
   const formData = new FormData();
   formData.append("image", file);
 
-  const res = await axios.post("/api/user/upload", formData);
+  const res = await axios.post("/user/upload", formData);
 
   const imageUrl = res.data.imageUrl;
 
-  setUser(prev => ({ ...prev, image: imageUrl }));
-
-  await axios.put("/api/user/profile", {
-    ...user,
-    image: imageUrl
+  setUser(prev => {
+    const updated = { ...prev, image: imageUrl };
+  
+    await axios.put("/user/profile", updated);
+  
+    return updated;
   });
 };
   const saveProfile = async () => {
-    await axios.put("/api//user/profile", user);
-    setEdit(false);
+    try{
+      await axios.put("/user/profile", user);
+      setEdit(false);
+    }catch(err){
+      console.log("Profile updated error:",err);
+    }
   };
 
   const completedCount = interviews.filter(
