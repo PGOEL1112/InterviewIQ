@@ -21,24 +21,16 @@ const ForgotPassword = () => {
         try{
 
             setLoading(true);
-
-            await axios.post(
-                `${import.meta.env.VITE_API_URL}/auth/send-reset-otp`,
-                {email}
-            );
-
+             await axios.post("/auth/send-reset-otp", { email });
             localStorage.setItem("resetEmail",email);
-
             navigate("/verify-reset-otp");
 
         }
 
         catch(err){
-
             setMessage(
                 err.response?.data?.message || "Failed to send OTP"
             );
-
         }
 
         finally{
