@@ -62,8 +62,8 @@ const AIFeedbackUltra = ({ interviews, onDelete }) => {
                   {/* DOWNLOAD PDF */}
                   <button
                     onClick={() => {
-                      window.open(
-                        `/api/interview/report/${i._id}`,
+                     window.open(
+                        `https://interviewiq-0iq8.onrender.com/api/interview/report/${i._id}`,
                         "_blank"
                       );
                     }}
