@@ -31,7 +31,13 @@ const Auth = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   /* ---------------- AUTO HIDE MESSAGE ---------------- */
-
+  useEffect(() => {
+    if (localStorage.getItem("name")) {
+      navigate("/dashboard");
+    }
+  }, []);
+  
+    
   useEffect(() => {
 
     if (message) {
@@ -82,14 +88,11 @@ const Auth = () => {
       console.log("GOOGLE RES:", res.data); 
       dispatch(setUser(res.data.user));
       localStorage.setItem("name", res.data.user.name);
-     useEffect(() => {
-      if (localStorage.getItem("name")) {
-        navigate("/dashboard");
-      }
-    }, []);
+      navigate("/dashboard");
+   
 
     } catch (err) {
-
+      console.log("Google error:",err);
       const errorMsg = err.response?.data?.message;
       setMessage(errorMsg || "Google login failed");
       setType("error");
