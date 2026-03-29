@@ -546,12 +546,7 @@ useEffect(() => {
                       <div className="flex gap-3">
 
                         <button
-                         onClick={() => 
-                            window.open(
-                              `https://interviewiq-0iq8.onrender.com/api/interview/report/${i._id}`,
-                              "_blank"
-                            )
-                          }
+                        onClick={() => navigate(`/report/${i._id}`)}
                           className="px-4 py-1 text-sm rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition"
                         >
                           View
