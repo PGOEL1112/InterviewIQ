@@ -124,15 +124,10 @@ try{
 
 setLoading(true);
 
-const res = await axios.post(
-
-`${import.meta.env.VITE_API_URL}/auth/verify-email`,
-{
-email,
-otp:finalOtp
-}
-
-);
+const res = await axios.post("/auth/verify-email", {
+  email,
+  otp: finalOtp
+});
 
 if(res.data.success){
 
@@ -174,11 +169,7 @@ try{
 
 const email = localStorage.getItem("verifyEmail");
 
-await axios.post(
-`${import.meta.env.VITE_API_URL}/auth/resend-otp`,
-{ email }
-);
-
+await axios.post("/auth/resend-otp", { email });
 setTimer(60);
 
 setMessage("OTP sent again to your email");
