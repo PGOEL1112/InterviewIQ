@@ -40,7 +40,7 @@ const NewPassword = () => {
     }
 
     try{
-      await axios.post("/auth/reset-password", {
+      const res = await axios.post("/auth/reset-password", {
         email,
         password
       });
