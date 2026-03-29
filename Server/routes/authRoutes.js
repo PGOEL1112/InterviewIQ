@@ -41,8 +41,6 @@ router.post("/reset-password", resetPassword);
 
 
 /* ---------- USER ---------- */
-
-router.get("/profile", isAuth, getProfile);
 router.get("/logout", logoutUser);
 
 
