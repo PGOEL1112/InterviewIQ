@@ -43,20 +43,21 @@ export const analyzeResume = async (filePath) => {
       buffer = fs.readFileSync(filePath);
     }
     let resumeText = "";
-    if (filePath.endsWith(".pdf")) {
+    
+    try {
+      // 🔥 try PDF first
       const data = await pdf(buffer);
       resumeText = data.text;
-
-    } else if (filePath.endsWith(".docx")) {
-      const result = await mammoth.extractRawText({ buffer });
-      resumeText = result.value;
-
-    }
-    else if (filePath.endsWith(".doc")) {
-      throw new Error("Please upload DOCX or PDF file");
-    } 
-    else {
-      throw new Error("Unsupported file format. Use PDF or DOCX.");
+    
+    } catch (err) {
+      try {
+        // 🔥 if not PDF → try DOCX
+        const result = await mammoth.extractRawText({ buffer });
+        resumeText = result.value;
+    
+      } catch (err2) {
+        throw new Error("Unsupported file format. Use PDF or DOCX.");
+      }
     }
 
     console.log("Extracted Resume Text:");
