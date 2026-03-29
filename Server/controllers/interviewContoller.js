@@ -474,9 +474,8 @@ export const resumeAnalysis = async (req, res) => {
       return res.status(400).json({ message: "Resume required" });
     }
 
-    const filePath = req.file.path;
-    const analysis = await analyzeResume(filePath);
-    fs.unlinkSync(filePath);   // delete uploaded file
+    const fileUrl = req.file.path;
+    const analysis = await analyzeResume(fileUrl);  // delete uploaded file
 
     res.json({
       success: true,
@@ -489,11 +488,6 @@ export const resumeAnalysis = async (req, res) => {
   } catch (error) {
 
     console.error(error);
-
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
     res.status(500).json({
       success: false,
       message: error.message
@@ -682,8 +676,8 @@ export const startResumeInterview = async (req, res) => {
       );
     }
 
-    const filePath = req.file.path;
-    const resumeData = await analyzeResume(filePath);
+    const fileUrl = req.file.path;
+    const resumeData = await analyzeResume(fileUrl);
 
     const questionData = await generateResumeQuestions(
       resumeData.skills,
@@ -702,10 +696,7 @@ export const startResumeInterview = async (req, res) => {
       }))
 
     });
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+}
 
     res.json({
       success: true,
