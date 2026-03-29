@@ -32,7 +32,7 @@ const Auth = () => {
 
   /* ---------------- AUTO HIDE MESSAGE ---------------- */
   useEffect(() => {
-    if (localStorage.getItem("name")) {
+    if (localStorage.getItem("user")) {
       navigate("/dashboard");
     }
   }, []);
@@ -87,7 +87,7 @@ const Auth = () => {
       );
       console.log("GOOGLE RES:", res.data); 
       dispatch(setUser(res.data.user));
-      localStorage.setItem("name", res.data.user.name);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
    
 
@@ -193,7 +193,7 @@ const Auth = () => {
       );
 
       dispatch(setUser(res.data.user));
-      localStorage.setItem("name", res.data.user.name);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
 
     } catch (err) {
