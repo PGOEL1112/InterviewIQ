@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 /* -------- PAGES -------- */
 import axios from "axios";
 
-axios.defaults.baseURL = "https://interviewiq-0iq8.onrender.com";
+axios.defaults.baseURL = "https://interviewiq-0iq8.onrender.com/api";
 axios.defaults.withCredentials = true;
 
 
