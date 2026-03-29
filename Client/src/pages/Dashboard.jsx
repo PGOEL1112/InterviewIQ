@@ -111,6 +111,15 @@ const Dashboard = () => {
 
   }, []);
 
+  const handleLogout = async () => {
+  try {
+    await axios.get("/auth/logout");
+    dispatch(logoutUser());
+    navigate("/auth");
+  } catch (err) {
+    console.log(err);
+  }
+};
   const handleDelete = async (id) => {
     try {
       await axios.delete(`/interview/${id}`);
@@ -321,11 +330,7 @@ useEffect(() => {
                     </div>
 
                     <div
-                      onClick={() => {
-                        await axios.get("/auth/logout");
-                        dispatch(logoutUser());
-                        navigate("/");
-                      }}
+                      onClick={handleLogout}
                       className="px-4 py-3 hover:bg-white/10 cursor-pointer flex items-center gap-2"
                     >
                       <FaSignOutAlt /> Logout
