@@ -47,16 +47,8 @@ const Dashboard = () => {
     const fetchHistory = async () => {
 
       try {
-
-        const token = localStorage.getItem("token");
-
-        const res = await axios.get(
-          "/api/interview/history",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+      const res = await axios.get(
+          "/interview/history",
         );
 
         const data = res.data.interviews || [];
@@ -121,12 +113,7 @@ const Dashboard = () => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.delete(`/api/interview/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
+      await axios.delete(`/interview/${id}`);
       setInterviews(prev => prev.filter(i => i._id !== id));
 
     } catch (err) {
@@ -335,6 +322,7 @@ useEffect(() => {
 
                     <div
                       onClick={() => {
+                        await axios.get("/auth/logout");
                         dispatch(logoutUser());
                         navigate("/");
                       }}
