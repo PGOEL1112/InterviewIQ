@@ -2,7 +2,7 @@ import express from "express";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import User from "../models/userModel.js";
-import { protect } from "../middlewares/authMiddleware.js";
+import isAuth from "../middlewares/isAuth.js";
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ const razorpay = new Razorpay({
 
 /* ---------------- CREATE ORDER ---------------- */
 
-router.post("/create-order", protect, async (req, res) => {
+router.post("/create-order", isAuth, async (req, res) => {
   try {
     const { amount, plan, currency, billing } = req.body;
 
@@ -40,7 +40,7 @@ router.post("/create-order", protect, async (req, res) => {
       },
     };
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
 
     const selectedLimit = planLimits[currency]?.[billing]?.[plan];
     const currentLimit =
@@ -87,7 +87,7 @@ router.post("/create-order", protect, async (req, res) => {
 
 /* ---------------- VERIFY PAYMENT ---------------- */
 
-router.post("/verify", protect, async (req, res) => {
+router.post("/verify", isAuth, async (req, res) => {
   try {
     const {
       razorpay_order_id,
@@ -139,7 +139,7 @@ router.post("/verify", protect, async (req, res) => {
 
     // ✅ UPDATE USER (IMPORTANT: new:true)
     const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       {
         $inc: { credits: creditsToAdd },
         $set: { 
