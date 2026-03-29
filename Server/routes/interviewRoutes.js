@@ -1,6 +1,7 @@
 import express from "express";
 
 import uploadResume from "../middlewares/uploadResume.js";
+import uploadAudio from "../middlewares/uploadAudio.js";
 import isAuth from "../middlewares/isAuth.js";
 
 import {
@@ -42,7 +43,7 @@ router.post("/answer/:interviewId", isAuth, submitAnswer);
 router.post(
   "/voice-answer",
   isAuth,
-  upload.single("audio"),
+  uploadAudio.single("audio"),
   voiceAnswerEvaluation
 );
 
