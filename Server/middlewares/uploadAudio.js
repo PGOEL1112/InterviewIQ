@@ -18,6 +18,6 @@ const storage = new CloudinaryStorage({
   }
 });
 
-const upload = multer({ storage });
+const uploadAudio = multer({ storage });
 
-export default uploadResume;
+export default uploadAudio;
