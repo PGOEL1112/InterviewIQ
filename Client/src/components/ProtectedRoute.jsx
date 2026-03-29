@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        await axios.get("/api/auth/me"); // cookie verify
+        await axios.get("/auth/me"); // cookie verify
         setIsAuth(true);
       } catch {
         setIsAuth(false);
