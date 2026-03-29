@@ -1,7 +1,7 @@
 import fs from "fs";
 import { createRequire } from "module";
 import { callAI } from "./openRouterServices.js";
-
+import axios from "axios";
 const require = createRequire(import.meta.url);
 const pdf = require("pdf-parse");
 const mammoth = require("mammoth");
@@ -33,10 +33,16 @@ const detectExperienceLevel = (expText) => {
 export const analyzeResume = async (filePath) => {
 
   try {
-
-    const buffer = fs.readFileSync(filePath);
-        let resumeText = "";
-
+    let buffer;
+     if (filePath.startsWith("http")) {
+      const response = await axios.get(filePath, {
+        responseType: "arraybuffer"
+      });
+      buffer = response.data;
+    } else {
+      buffer = fs.readFileSync(filePath);
+    }
+    let resumeText = "";
     if (filePath.endsWith(".pdf")) {
       const data = await pdf(buffer);
       resumeText = data.text;
