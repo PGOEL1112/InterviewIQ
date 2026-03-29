@@ -78,14 +78,13 @@ const Coins = () => {
             }
 
             const res = await axios.post(
-                "/api/payment/create-order",
+                "/payment/create-order",
                 {
                     amount: finalAmount,
                     plan,
                     currency: "INR",
                     billing
                 },
-                { withCredentials: true }
             );
 
             const order = res.data.order;
@@ -100,14 +99,13 @@ const Coins = () => {
 
                 handler: async function (response) {
                     const verifyRes = await axios.post(
-                        "/api/payment/verify",
+                        "/payment/verify",
                         {
                             ...response,
                             plan,
                             billing,
                             originalCurrency: currency
                         },
-                        { withCredentials: true }
                     );
 
                     if (verifyRes.data.success) {
@@ -127,6 +125,7 @@ const Coins = () => {
             rzp.open();
 
         } catch (err) {
+            alert(err.response?.data?.message || "Payment failed ❌");
             console.log(err);
         }
     };
