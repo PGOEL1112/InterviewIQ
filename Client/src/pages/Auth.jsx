@@ -31,11 +31,24 @@ const Auth = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   /* ---------------- AUTO HIDE MESSAGE ---------------- */
-  useEffect(() => {
-    if (localStorage.getItem("user")) {
-      navigate("/dashboard");
+ useEffect(() => {
+  const user = localStorage.getItem("user");
+
+  if (user) {
+    try {
+      const parsed = JSON.parse(user);
+
+      if (parsed && parsed._id) {
+        navigate("/dashboard");
+      } else {
+        localStorage.removeItem("user");
+      }
+
+    } catch {
+      localStorage.removeItem("user");
     }
-  }, []);
+  }
+}, []);
   
     
   useEffect(() => {
