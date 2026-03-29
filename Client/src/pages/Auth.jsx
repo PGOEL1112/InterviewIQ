@@ -34,7 +34,7 @@ const Auth = () => {
 useEffect(() => {
   const checkAuth = async () => {
     try {
-      await axios.get("/api/auth/me");
+      await axios.get("/auth/me");
       navigate("/dashboard");
     } catch(err) {
       console.log(err);
