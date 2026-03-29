@@ -32,16 +32,13 @@ const Auth = () => {
 
   /* ---------------- AUTO HIDE MESSAGE ---------------- */
 useEffect(() => {
-  const user = localStorage.getItem("user");
-  if (!user) return; 
-
   const checkAuth = async () => {
     try {
       await axios.get("/api/auth/me");
       navigate("/dashboard");
     } catch(err) {
       console.log(err);
-      localStorage.removeItem("user");
+      // stay on auth page
     }
   };
 
@@ -88,7 +85,7 @@ useEffect(() => {
       const user = result.user;
 
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/google`,
+        "/auth/google",
         {
           name: user.displayName,
           email: user.email,
@@ -98,7 +95,6 @@ useEffect(() => {
       );
       console.log("GOOGLE RES:", res.data); 
       dispatch(setUser(res.data.user));
-      localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
    
 
@@ -146,7 +142,7 @@ useEffect(() => {
       setLoading(true);
 
       await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/register`,
+        "/auth/register",
         {
           name,
           email,
@@ -195,7 +191,7 @@ useEffect(() => {
       setLoading(true);
 
       const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
+        "/auth/login",
         {
           email,
           password
@@ -204,7 +200,6 @@ useEffect(() => {
       );
 
       dispatch(setUser(res.data.user));
-      localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/dashboard");
 
     } catch (err) {
@@ -214,7 +209,7 @@ useEffect(() => {
       if (errorMsg === "Please verify your email first") {
 
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/resend-otp`,
+          "/auth/resend-otp",
           { email }
         );
 
@@ -255,7 +250,7 @@ useEffect(() => {
     setLoading(true);
 
     await axios.post(
-      `${import.meta.env.VITE_API_URL}/auth/send-reset-otp`,
+      "/auth/send-reset-otp",
       { email: forgotEmail }
     );
 
