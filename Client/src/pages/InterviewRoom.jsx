@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { FaMicrophone, FaPaperPlane, FaDownload } from "react-icons/fa";
@@ -92,13 +93,13 @@ const InterviewRoom = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.post(
-        `/api/interview/question/${interviewId}`,
+        `/interview/question/${interviewId}`,
         {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
+         {
+             headers: {
+               Authorization: `Bearer ${token}`
+             }
           }
-        }
       );
 
       const data = res.data;
@@ -276,7 +277,8 @@ const InterviewRoom = () => {
   };
 
   const playIntro = () => {
-    const userName = localStorage.getItem("name") || "User";
+   const user = useSelector(state => state.user.user);
+   const userName = user?.name || "User";
 
     const welcomeText = `
   Hello ${userName}! Welcome to your AI mock interview.
@@ -393,16 +395,17 @@ const InterviewRoom = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `/api/interview/answer/${interviewId}`,
+        `/interview/answer/${interviewId}`,
         {
           answer: finalAnswer,
           timeTaken: type === "auto" ? timeLimit : Math.max(0, timeLimit - timeLeft)
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+          {
+             headers: 
+                {
+                  Authorization: `Bearer ${token}`
+                }
+           }
       );
 
       const data = res.data;
@@ -486,12 +489,11 @@ const InterviewRoom = () => {
 
   const finishInterview = async () => {
     try {
-      const token = localStorage.getItem("token");
-
+       const token = localStorage.getItem("token");
       await axios.post(
-        `/api/interview/complete/${interviewId}`,
+        `/interview/complete/${interviewId}`,
         {},
-        {
+          {
           headers: {
             Authorization: `Bearer ${token}`
           }
