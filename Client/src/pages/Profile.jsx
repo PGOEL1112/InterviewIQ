@@ -30,23 +30,18 @@ const Profile = ( ) => {
   };
 
   const handleImage = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const formData = new FormData();
-  formData.append("image", file);
-
-  const res = await axios.post("/user/upload", formData);
-
-  const imageUrl = res.data.imageUrl;
-
-  setUser(prev => {
-    const updated = { ...prev, image: imageUrl };
+    const file = e.target.files[0];
+    if (!file) return;
   
+    const formData = new FormData();
+    formData.append("image", file);
+  
+    const res = await axios.post("/user/upload", formData);
+  
+    const imageUrl = res.data.imageUrl;
+    const updated = { ...user, image: imageUrl };
     await axios.put("/user/profile", updated);
-  
-    return updated;
-  });
+    setUser(updated);
 };
   const saveProfile = async () => {
     try{
