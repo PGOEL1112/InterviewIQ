@@ -8,6 +8,17 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/auth" />;
   }
 
+  try{
+    const parsed = JSON.parse(user);
+    if(!parsed?._id){
+      return <Navigate to="/auth" />;
+    }
+  }
+  catch(err){
+    console.log(err);
+    return <Navigate to="/auth" />;
+  }
+
   return children;
 };
 
