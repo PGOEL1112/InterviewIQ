@@ -48,7 +48,7 @@ const NewPassword = () => {
       if(res.data.success){
 
         setMessage("Password reset successful");
-
+        localStorage.removeItem("resetVerified"); // optional cleanup
         setTimeout(()=>{
           navigate("/auth");
         },1500);
