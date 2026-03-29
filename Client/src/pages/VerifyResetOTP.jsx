@@ -63,12 +63,10 @@ const VerifyResetOTP = () => {
               otp: finalOtp
             });
 
-      if (res.data.success) {
-
-        navigate("/new-password");
-
-      }
-
+     if (res.data.success) {
+      localStorage.setItem("resetVerified", "true"); // ✅ ADD THIS
+      navigate("/new-password");
+    }
     } catch (err) {
 
       setMessage(
