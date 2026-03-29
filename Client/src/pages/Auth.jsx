@@ -31,23 +31,20 @@ const Auth = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   /* ---------------- AUTO HIDE MESSAGE ---------------- */
- useEffect(() => {
-  const user = localStorage.getItem("user");
-
-  if (user) {
+useEffect(() => {
+  const checkAuth = async () => {
     try {
-      const parsed = JSON.parse(user);
+      const res = await axios.get("/api/auth/me");
 
-      if (parsed && parsed._id) {
-        navigate("/dashboard");
-      } else {
-        localStorage.removeItem("user");
-      }
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      navigate("/dashboard");
 
-    } catch {
-      localStorage.removeItem("user");
+    } catch (err) {
+      localStorage.removeItem("user"); // 🔥 auto fix
     }
-  }
+  };
+
+  checkAuth();
 }, []);
   
     
