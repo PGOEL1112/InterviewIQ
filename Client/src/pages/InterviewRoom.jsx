@@ -10,7 +10,6 @@ import "react-circular-progressbar/dist/styles.css";
 import femaleAI from "../assets/Videos/female-ai.mp4";
 import maleAI from "../assets/Videos/male-ai.mp4";
 import { useNavigate } from "react-router-dom";
-import { current } from "@reduxjs/toolkit";
 
 /* ==============================
    VOICE WAVEFORM COMPONENT
@@ -31,6 +30,7 @@ const VoiceWave = () => (
   </div>
 );
 const InterviewRoom = () => {
+   const user = useSelector(state => state.user.user);
   const navigate = useNavigate();
   const { interviewId } = useParams();
   /* ---------------------------
@@ -277,7 +277,6 @@ const InterviewRoom = () => {
   };
 
   const playIntro = () => {
-   const user = useSelector(state => state.user.user);
    const userName = user?.name || "User";
 
     const welcomeText = `
