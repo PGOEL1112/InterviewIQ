@@ -28,8 +28,6 @@ app.use(cookieParser());
 
 
 // Routes
-app.use("/uploads", express.static("public"));
-app.use("/audio", express.static("public/audio"));
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/interview", interviewRoutes);
