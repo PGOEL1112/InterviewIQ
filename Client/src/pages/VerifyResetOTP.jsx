@@ -58,13 +58,10 @@ const VerifyResetOTP = () => {
 
     try {
 
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/verify-reset-otp`,
-        {
-          email,
-          otp: finalOtp
-        }
-      );
+      const res =await axios.post("/auth/verify-reset-otp", {
+              email,
+              otp: finalOtp
+            });
 
       if (res.data.success) {
 
@@ -87,11 +84,7 @@ const VerifyResetOTP = () => {
 
     try {
 
-      await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/send-reset-otp`,
-        { email }
-      );
-
+     await axios.post("/auth/send-reset-otp", { email });
       setTimer(60);
 
     } catch {
