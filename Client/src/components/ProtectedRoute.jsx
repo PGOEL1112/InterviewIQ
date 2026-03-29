@@ -1,25 +1,29 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import axios from "axios";
 
 const ProtectedRoute = ({ children }) => {
+  const [loading, setLoading] = useState(true);
+  const [isAuth, setIsAuth] = useState(false);
 
-  const user = localStorage.getItem("user");
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await axios.get("/api/auth/me"); // cookie verify
+        setIsAuth(true);
+      } catch {
+        setIsAuth(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!user) {
-    return <Navigate to="/auth" />;
-  }
+    checkAuth();
+  }, []);
 
-  try{
-    const parsed = JSON.parse(user);
-    if(!parsed?._id){
-      return <Navigate to="/auth" />;
-    }
-  }
-  catch(err){
-    console.log(err);
-    return <Navigate to="/auth" />;
-  }
+  if (loading) return <div>Loading...</div>;
 
-  return children;
+  return isAuth ? children : <Navigate to="/auth" />;
 };
 
 export default ProtectedRoute;
