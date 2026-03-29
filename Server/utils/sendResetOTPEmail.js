@@ -1,29 +1,19 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-/* ---------- TRANSPORTER ---------- */
-
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* ---------- SEND RESET OTP EMAIL ---------- */
 
 export const sendResetOTPEmail = async (email, otp) => {
+  try {
 
-    try {
-
-        const mailOptions = {
-
-            from: `InterviewIQ <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Password Reset OTP • InterviewIQ",
+    await resend.emails.send({
+      from: "InterviewIQ <onboarding@resend.dev>",
+      to: email,
+      subject: "Password Reset OTP • InterviewIQ",
 
             html: `
 <!DOCTYPE html>
@@ -155,7 +145,6 @@ AI Interview Practice Platform
 `
         };
 
-        await transporter.sendMail(mailOptions);
         console.log("✅ Reset OTP email sent to:", email);
     }
 
