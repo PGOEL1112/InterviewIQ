@@ -1,12 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
-
-/* -------- PAGES -------- */
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUser } from "./redux/userSlice";
 
 axios.defaults.baseURL = "https://interviewiq-0iq8.onrender.com/api";
 axios.defaults.withCredentials = true;
-
 
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
@@ -19,13 +18,29 @@ import ForgotPassword from "./pages/ForgotPassword";
 import VerifyResetOTP from "./pages/VerifyResetOTP";
 import NewPassword from "./pages/NewPassword";
 import Step1Setup from "./pages/Step1Setup";
+import InterviewRoom from "./pages/InterviewRoom";
+import ReportPage from "./pages/ReportPage";
 /* -------- COMPONENTS -------- */
 
 import ProtectedRoute from "./components/ProtectedRoute";
-import InterviewRoom from "./pages/InterviewRoom";
-import ReportPage from "./pages/ReportPage";
+
 
 function App() {
+   const dispatch = useDispatch(); 
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const res = await axios.get("/auth/me");
+        dispatch(setUser(res.data.user));
+      } catch {
+        console.log("Not logged in");
+      }
+    };
+
+    loadUser();
+  }, [dispatch]); 
+
   return (
 
     <Routes>
@@ -55,7 +70,14 @@ function App() {
         }
       />
       <Route path="/report/:id" element={<ReportPage />} />
-      <Route path="/profile" element={<Profile />} />
+        <Route
+      path="/profile"
+      element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      }
+    />
       <Route path="/coins" element={<Coins />} />
     </Routes>
 
