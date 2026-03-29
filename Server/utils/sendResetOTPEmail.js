@@ -126,7 +126,7 @@ If you didn't request this email, you can safely ignore it.
 <td align="center">
 
 <p style="font-size:12px;color:#9ca3af;margin:0;">
-© ${new Date().getFullYear()} InterviewIQ
+© 2026 InterviewIQ
 <br/>
 AI Interview Practice Platform
 </p>
