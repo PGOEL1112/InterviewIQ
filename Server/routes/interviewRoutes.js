@@ -1,6 +1,6 @@
 import express from "express";
 
-import upload from "../middlewares/upload.js";
+import uploadResume from "../middlewares/uploadResume.js";
 import isAuth from "../middlewares/isAuth.js";
 
 import {
@@ -25,14 +25,14 @@ router.post("/start", isAuth, startInterview);
 router.post(
   "/resume",
   isAuth,
-  upload.single("resume"),
+  uploadResume.single("resume"),
   resumeAnalysis
 );
 
 router.post(
   "/resume-interview",
   isAuth,
-  upload.single("resume"),
+  uploadResume.single("resume"),
   startResumeInterview
 );
 
