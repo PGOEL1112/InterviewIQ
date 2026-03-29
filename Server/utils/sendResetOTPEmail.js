@@ -143,7 +143,7 @@ AI Interview Practice Platform
 </body>
 </html>
 `
-        };
+        });
 
         console.log("✅ Reset OTP email sent to:", email);
     }
