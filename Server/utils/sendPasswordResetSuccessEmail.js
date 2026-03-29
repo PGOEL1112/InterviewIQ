@@ -127,7 +127,7 @@ AI Interview Practice Platform
 </body>
 </html>
 `
-        };
+        });
 
         console.log("✅ Password reset confirmation sent");
 
